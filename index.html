@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Contabilidad Personal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Control Financiero</h1>
+        <p>Administra tus ingresos, gastos y ahorros</p>
+    </header>
+
+    <!-- Tarjetas de Resumen -->
+    <div class="grid-cards">
+        <div class="card">
+            <h3>Ingresos Totales</h3>
+            <div id="total-ingresos" class="amount ingreso">$0.00</div>
+        </div>
+        <div class="card">
+            <h3>Gastos Totales</h3>
+            <div id="total-gastos" class="amount gasto">$0.00</div>
+        </div>
+        <div class="card">
+            <h3>Balance Neto</h3>
+            <div id="balance-neto" class="amount balance">$0.00</div>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="main-content">
+        <!-- Formulario de Registro -->
+        <div class="card">
+            <h3 style="margin-bottom: 15px; color: #f8fafc;">Registrar Movimiento</h3>
+            <form id="finance-form">
+                <div class="form-group">
+                    <label for="tipo">Tipo de Movimiento</label>
+                    <select id="tipo" required>
+                        <option value="ingreso">Ingreso (+)</option>
+                        <option value="gasto" selected>Gasto (-)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="categoria">Categoría</label>
+                    <select id="categoria" required>
+                        <!-- Ingresos -->
+                        <option value="sueldo">Sueldo</option>
+                        <option value="ingreso_extra">Ingreso Extra</option>
+                        <!-- Gastos -->
+                        <option value="alquiler">Alquiler</option>
+                        <option value="comida">Comida</option>
+                        <option value="salidas">Salidas / Entretenimiento</option>
+                        <option value="otro">Otros (Personalizado)</option>
+                    </select>
+                </div>
+
+                <div class="form-group hidden" id="concepto-group">
+                    <label for="concepto">Nombre del Gasto u Otro</label>
+                    <input type="text" id="concepto" placeholder="Ej. Internet, Reparación, Ropa...">
+                </div>
+
+                <div class="form-group">
+                    <label for="monto">Monto ($)</label>
+                    <input type="number" id="monto" step="0.01" min="0.01" placeholder="0.00" required>
+                </div>
+
+                <button type="submit" class="btn-primary">Guardar Registro</button>
+            </form>
+        </div>
+
+        <!-- Historial y Acciones -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="color: #f8fafc;">Historial</h3>
+                <button id="btn-limpiar" class="btn-danger">Borrar Todo</button>
+            </div>
+            <ul id="lista-transacciones">
+                <!-- Se llena de forma dinámica con JS -->
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
