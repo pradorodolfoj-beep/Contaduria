@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Control Financiero</title>
+    <title>Control Financiero Pro</title>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="./styles.css">
@@ -12,14 +12,23 @@
 
 <div class="app-container">
     <header class="app-header">
-        <h1>Control Financiero</h1>
-        <p>Monitoreo de ingresos, gastos y vencimientos</p>
+        <div class="header-content">
+            <div>
+                <h1>Finanzas Pro</h1>
+                <p>Gestión inteligente, tasas de cambio y deudas</p>
+            </div>
+            <!-- Configuración de Hora de Alarma -->
+            <div class="alarm-config">
+                <label for="hora-aviso">⏰ Hora de Alerta:</label>
+                <input type="time" id="hora-aviso" value="09:00">
+            </div>
+        </div>
     </header>
 
-    <!-- Alertas de Deudas Vencidas -->
+    <!-- Alertas de Deudas Activas / Vencidas -->
     <div id="alertas-container"></div>
 
-    <!-- Métrica de Resumen -->
+    <!-- Métricas de Resumen (Ahora con Deudas Pendientes) -->
     <section class="metrics-grid">
         <div class="metric-card ingreso">
             <span class="metric-label">Ingresos Totales</span>
@@ -29,22 +38,26 @@
             <span class="metric-label">Gastos Totales</span>
             <div id="total-gastos" class="metric-value">$0.00</div>
         </div>
+        <div class="metric-card deuda-card">
+            <span class="metric-label">Deudas Pendientes</span>
+            <div id="total-deudas" class="metric-value">$0.00</div>
+        </div>
         <div class="metric-card balance">
             <span class="metric-label">Balance Neto</span>
             <div id="balance-neto" class="metric-value">$0.00</div>
         </div>
     </section>
 
-    <!-- Sección de Gráfica Comparativa -->
+    <!-- Gráfica Comparativa -->
     <section class="card chart-section">
         <div class="chart-header">
-            <h3>Comparativa de Ingresos vs. Gastos</h3>
+            <h3>Flujo Financiero</h3>
             <div class="date-filter">
                 <input type="date" id="filtro-desde">
                 <span>a</span>
                 <input type="date" id="filtro-hasta">
                 <button id="btn-filtrar" class="btn-secondary">Filtrar</button>
-                <button id="btn-reset-filtro" class="btn-ghost" title="Restablecer">↻</button>
+                <button id="btn-reset-filtro" class="btn-ghost" title="Limpiar filtro">↻</button>
             </div>
         </div>
         <div class="chart-wrapper">
@@ -52,11 +65,11 @@
         </div>
     </section>
 
-    <!-- Formulario + Historial -->
+    <!-- Contenido Principal -->
     <main class="main-grid">
         <!-- Formulario -->
         <section class="card form-card">
-            <h3 class="card-title">Registrar Movimiento</h3>
+            <h3 class="card-title">Nuevo Movimiento</h3>
             <form id="finance-form">
                 <div class="form-row">
                     <div class="form-group">
@@ -74,7 +87,7 @@
                             <option value="Ingreso Extra">Ingreso Extra</option>
                             <option value="Alquiler">Alquiler</option>
                             <option value="Comida">Comida</option>
-                            <option value="Salidas">Salidas / Entretenimiento</option>
+                            <option value="Salidas">Salidas / Ocio</option>
                             <option value="Deuda">Deuda / Compromiso</option>
                             <option value="Otros">Otros (Personalizado)</option>
                         </select>
@@ -82,17 +95,28 @@
                 </div>
 
                 <div class="form-group hidden" id="concepto-group">
-                    <label for="concepto">Categoría Personalizada</label>
-                    <input type="text" id="concepto" placeholder="Ej. Servicios, Mascotas...">
+                    <label for="concepto">Nombre Personalizado</label>
+                    <input type="text" id="concepto" placeholder="Ej. Servicios, Inversión...">
+                </div>
+
+                <!-- Selector de Tasa de Cambio -->
+                <div class="form-group">
+                    <label for="tasa-cambio">Tasa de Cambio Aplicada</label>
+                    <select id="tasa-cambio">
+                        <option value="BCV">Tasa BCV</option>
+                        <option value="Euro">Tasa Euro</option>
+                        <option value="Binance">Tasa Binance</option>
+                        <option value="DolarLibre" selected>Dólar Directo / Divisa</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
                     <label for="descripcion">Descripción / Detalle</label>
-                    <input type="text" id="descripcion" placeholder="Ej. Pago de supermercado, renta...">
+                    <input type="text" id="descripcion" placeholder="Ej. Pago de tarjeta, Supermercado...">
                 </div>
 
                 <div class="form-group hidden" id="vencimiento-group">
-                    <label for="fecha-vencimiento" class="text-alert">Vencimiento de la Deuda</label>
+                    <label for="fecha-vencimiento" class="text-alert">Fecha de Vencimiento de la Deuda</label>
                     <input type="date" id="fecha-vencimiento">
                 </div>
 
@@ -115,7 +139,7 @@
         <!-- Historial -->
         <section class="card history-card">
             <div class="history-header">
-                <h3 class="card-title">Historial de Movimientos</h3>
+                <h3 class="card-title">Historial</h3>
                 <button id="btn-limpiar" class="btn-danger">Borrar Todo</button>
             </div>
             <ul id="lista-transacciones"></ul>
