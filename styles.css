@@ -47,6 +47,12 @@ body {
     gap: 12px;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .app-header h1 {
     font-size: 1.6rem;
     color: #60a5fa;
@@ -58,29 +64,6 @@ body {
     font-size: 0.82rem;
 }
 
-.alarm-config {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-}
-
-.alarm-config label {
-    font-size: 0.75rem;
-    color: var(--warning);
-    display: block;
-    margin-bottom: 2px;
-}
-
-.alarm-config input[type="time"] {
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 0.85rem;
-    padding: 2px;
-}
-
-/* Tarjetas */
 .card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -97,7 +80,6 @@ body {
     font-weight: 700;
 }
 
-/* Métricas (4 columnas) */
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -138,7 +120,6 @@ body {
 .metric-card.deuda-card .metric-value { color: var(--warning); }
 .metric-card.balance .metric-value { color: #60a5fa; }
 
-/* Gráfica */
 .chart-header {
     display: flex;
     justify-content: space-between;
@@ -171,7 +152,6 @@ body {
     height: 220px;
 }
 
-/* Grid del Formulario */
 .main-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -216,7 +196,6 @@ input:focus, select:focus {
     border-color: var(--accent);
 }
 
-/* Botones */
 .btn-primary {
     width: 100%;
     padding: 12px;
@@ -230,21 +209,22 @@ input:focus, select:focus {
 }
 
 .btn-secondary {
-    padding: 5px 10px;
+    padding: 6px 12px;
     background: #374151;
     color: #fff;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.78rem;
     cursor: pointer;
+    font-weight: 600;
 }
 
 .btn-ghost {
-    padding: 5px 8px;
+    padding: 8px 14px;
     background: transparent;
     border: 1px solid var(--border-color);
     color: var(--text-muted);
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
@@ -258,7 +238,6 @@ input:focus, select:focus {
     cursor: pointer;
 }
 
-/* Historial */
 .history-header {
     display: flex;
     justify-content: space-between;
@@ -306,6 +285,7 @@ li.deuda { border-left-color: var(--warning); }
     border-radius: 4px;
     display: inline-block;
     margin-top: 3px;
+    margin-right: 4px;
 }
 
 .alert-box {
@@ -324,4 +304,63 @@ li.deuda { border-left-color: var(--warning); }
     color: #fecaca;
 }
 
-.hidden { display: none; }
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(3, 7, 18, 0.75);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-card {
+    background: #111827;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.modal-icon {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+}
+
+.modal-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: var(--text-main);
+}
+
+.modal-card p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-primary-modal {
+    padding: 8px 16px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.hidden { display: none !important; }
