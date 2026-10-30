@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Control Financiero Pro</title>
+    <!-- Enlace para PWA / Instalación en Chrome -->
+    <link rel="manifest" href="./manifest.json">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="./styles.css">
@@ -17,10 +19,8 @@
                 <h1>Finanzas Pro</h1>
                 <p>Gestión inteligente, tasas de cambio y deudas</p>
             </div>
-            <!-- Configuración de Hora de Alarma -->
-            <div class="alarm-config">
-                <label for="hora-aviso">⏰ Hora de Alerta:</label>
-                <input type="time" id="hora-aviso" value="09:00">
+            <div class="header-actions">
+                <button id="btn-notificaciones" class="btn-secondary" title="Activar Notificaciones Nativas">🔔 Activar Alertas</button>
             </div>
         </div>
     </header>
@@ -28,7 +28,7 @@
     <!-- Alertas de Deudas Activas / Vencidas -->
     <div id="alertas-container"></div>
 
-    <!-- Métricas de Resumen (Ahora con Deudas Pendientes) -->
+    <!-- Métricas de Resumen -->
     <section class="metrics-grid">
         <div class="metric-card ingreso">
             <span class="metric-label">Ingresos Totales</span>
@@ -115,9 +115,18 @@
                     <input type="text" id="descripcion" placeholder="Ej. Pago de tarjeta, Supermercado...">
                 </div>
 
-                <div class="form-group hidden" id="vencimiento-group">
-                    <label for="fecha-vencimiento" class="text-alert">Fecha de Vencimiento de la Deuda</label>
-                    <input type="date" id="fecha-vencimiento">
+                <!-- Campos de Deuda (Fecha y Hora individual) -->
+                <div id="vencimiento-container" class="hidden">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fecha-vencimiento" class="text-alert">Fecha de Vencimiento</label>
+                            <input type="date" id="fecha-vencimiento">
+                        </div>
+                        <div class="form-group">
+                            <label for="hora-alerta" class="text-alert">⏰ Hora de Alerta</label>
+                            <input type="time" id="hora-alerta" value="09:00">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -145,6 +154,19 @@
             <ul id="lista-transacciones"></ul>
         </section>
     </main>
+</div>
+
+<!-- MODAL PERSONALIZADO -->
+<div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-icon" id="modal-icon">⚠️</div>
+        <h3 id="modal-title">Confirmación</h3>
+        <p id="modal-message">¿Estás seguro de realizar esta acción?</p>
+        <div class="modal-actions">
+            <button id="modal-btn-cancel" class="btn-ghost">Cancelar</button>
+            <button id="modal-btn-confirm" class="btn-primary-modal">Confirmar</button>
+        </div>
+    </div>
 </div>
 
 <script src="./app.js"></script>
