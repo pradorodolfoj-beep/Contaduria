@@ -1,5 +1,6 @@
-let transacciones = JSON.parse(localStorage.getItem('transacciones_v4')) || [];
+let transacciones = JSON.parse(localStorage.getItem('transacciones_v7')) || [];
 let chartInstance = null;
+let accionConfirmadaCallback = null;
 
 const form = document.getElementById('finance-form');
 const tipoSelect = document.getElementById('tipo');
@@ -8,11 +9,11 @@ const conceptoGroup = document.getElementById('concepto-group');
 const conceptoInput = document.getElementById('concepto');
 const descripcionInput = document.getElementById('descripcion');
 const tasaCambioSelect = document.getElementById('tasa-cambio');
-const vencimientoGroup = document.getElementById('vencimiento-group');
+const vencimientoContainer = document.getElementById('vencimiento-container');
 const vencimientoInput = document.getElementById('fecha-vencimiento');
+const horaAlertaInput = document.getElementById('hora-alerta');
 const fechaRegistroInput = document.getElementById('fecha-registro');
 const montoInput = document.getElementById('monto');
-const horaAvisoInput = document.getElementById('hora-aviso');
 
 const totalIngresosEl = document.getElementById('total-ingresos');
 const totalGastosEl = document.getElementById('total-gastos');
@@ -21,20 +22,44 @@ const balanceNetoEl = document.getElementById('balance-neto');
 const listaTransaccionesEl = document.getElementById('lista-transacciones');
 const alertasContainer = document.getElementById('alertas-container');
 const btnLimpiar = document.getElementById('btn-limpiar');
+const btnNotificaciones = document.getElementById('btn-notificaciones');
 
 const filtroDesde = document.getElementById('filtro-desde');
 const filtroHasta = document.getElementById('filtro-hasta');
 const btnFiltrar = document.getElementById('btn-filtrar');
 const btnResetFiltro = document.getElementById('btn-reset-filtro');
 
+const modalOverlay = document.getElementById('modal-overlay');
+const modalIcon = document.getElementById('modal-icon');
+const modalTitle = document.getElementById('modal-title');
+const modalMessage = document.getElementById('modal-message');
+const modalBtnConfirm = document.getElementById('modal-btn-confirm');
+const modalBtnCancel = document.getElementById('modal-btn-cancel');
+
 fechaRegistroInput.value = new Date().toISOString().split('T')[0];
 
-// Cargar hora de aviso guardada
-const horaGuardada = localStorage.getItem('hora_aviso_deuda');
-if (horaGuardada) horaAvisoInput.value = horaGuardada;
+// Registrar Service Worker para permitir instalación PWA desde Chrome
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+  });
+}
 
-horaAvisoInput.addEventListener('change', () => {
-    localStorage.setItem('hora_aviso_deuda', horaAvisoInput.value);
+btnNotificaciones.addEventListener('click', () => {
+    if (!("Notification" in window)) {
+        mostrarModal("No soportado", "Tu navegador no soporta notificaciones nativas.", "❌", null, false);
+        return;
+    }
+
+    Notification.requestPermission().then((perm) => {
+        if (perm === "granted") {
+            btnNotificaciones.textContent = "🔔 Alertas Activas";
+            btnNotificaciones.style.background = "#10b981";
+            new Notification("Finanzas Pro", { body: "Las alertas de deudas individuales han sido activadas." });
+        } else {
+            btnNotificaciones.textContent = "🔕 Permiso Denegado";
+        }
+    });
 });
 
 categoriaSelect.addEventListener('change', () => {
@@ -49,11 +74,11 @@ categoriaSelect.addEventListener('change', () => {
     }
 
     if (val === 'Deuda') {
-        vencimientoGroup.classList.remove('hidden');
+        vencimientoContainer.classList.remove('hidden');
         vencimientoInput.required = true;
         tipoSelect.value = 'gasto';
     } else {
-        vencimientoGroup.classList.add('hidden');
+        vencimientoContainer.classList.add('hidden');
         vencimientoInput.required = false;
     }
 });
@@ -71,7 +96,9 @@ form.addEventListener('submit', (e) => {
     const descripcion = descripcionInput.value.trim() || 'Sin descripción';
     const tasaCambio = tasaCambioSelect.value;
     const fechaRegistro = fechaRegistroInput.value;
-    const fechaVencimiento = categoriaSelect.value === 'Deuda' ? vencimientoInput.value : null;
+    const esDeuda = categoriaSelect.value === 'Deuda';
+    const fechaVencimiento = esDeuda ? vencimientoInput.value : null;
+    const horaAlerta = esDeuda ? horaAlertaInput.value : null;
     const monto = parseFloat(montoInput.value);
 
     if (isNaN(monto) || monto <= 0) return;
@@ -84,6 +111,7 @@ form.addEventListener('submit', (e) => {
         tasaCambio,
         fechaRegistro,
         fechaVencimiento,
+        horaAlerta,
         monto
     });
 
@@ -92,12 +120,12 @@ form.addEventListener('submit', (e) => {
     form.reset();
     fechaRegistroInput.value = new Date().toISOString().split('T')[0];
     conceptoGroup.classList.add('hidden');
-    vencimientoGroup.classList.add('hidden');
+    vencimientoContainer.classList.add('hidden');
     tipoSelect.value = 'gasto';
 });
 
 function guardarYActualizar() {
-    localStorage.setItem('transacciones_v4', JSON.stringify(transacciones));
+    localStorage.setItem('transacciones_v7', JSON.stringify(transacciones));
     actualizarInterfaz();
 }
 
@@ -114,8 +142,7 @@ function actualizarInterfaz() {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    // Revisar alarma por hora configurada
-    verificarAlarmaPorHora(hoy);
+    verificarAlarmasIndividuales();
 
     if (transacciones.length === 0) {
         listaTransaccionesEl.innerHTML = '<p style="color: #64748b; text-align: center; padding: 15px;">Sin movimientos.</p>';
@@ -128,7 +155,6 @@ function actualizarInterfaz() {
             gastos += t.monto;
         }
 
-        // Calcular deudas pendientes
         if (t.categoria === 'Deuda') {
             deudasPendientes += t.monto;
 
@@ -139,7 +165,7 @@ function actualizarInterfaz() {
                 if (difDias < 0) {
                     crearAlerta(`🚨 <strong>DEUDA VENCIDA:</strong> "${t.descripcion}" ($${t.monto.toFixed(2)}) venció el ${formatFecha(t.fechaVencimiento)}.`, 'danger');
                 } else if (difDias <= 3) {
-                    crearAlerta(`⚠️ <strong>AVISO DE VENCIMIENTO:</strong> "${t.descripcion}" ($${t.monto.toFixed(2)}) vence ${difDias === 0 ? 'hoy' : 'en ' + difDias + ' día(s)'}.`, 'warning');
+                    crearAlerta(`⚠️ <strong>AVISO:</strong> "${t.descripcion}" ($${t.monto.toFixed(2)}) vence ${difDias === 0 ? 'hoy' : 'en ' + difDias + ' día(s)'}.`, 'warning');
                 }
             }
         }
@@ -148,17 +174,18 @@ function actualizarInterfaz() {
         li.className = t.categoria === 'Deuda' ? 'deuda' : t.tipo;
         
         let badgeVenc = t.fechaVencimiento ? `<br><span class="badge-deuda">Vence: ${formatFecha(t.fechaVencimiento)}</span>` : '';
+        let badgeHora = t.horaAlerta ? `<span class="badge-deuda">⏰ ${t.horaAlerta}</span>` : '';
         let badgeTasa = `<span class="badge-info">Tasa: ${t.tasaCambio}</span>`;
 
         li.innerHTML = `
             <div>
                 <strong>${t.categoria}</strong> <small style="color: #9ca3af;">(${formatFecha(t.fechaRegistro)})</small>
                 <p style="font-size: 0.8rem; color: #d1d5db; margin-top: 2px;">${t.descripcion}</p>
-                ${badgeTasa} ${badgeVenc}
+                ${badgeTasa} ${badgeVenc} ${badgeHora}
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-weight: bold; font-size: 0.95rem;">$${t.monto.toFixed(2)}</span>
-                <button onclick="eliminarTransaccion(${t.id})" style="background:none; border:none; color:#f87171; cursor:pointer; font-size:1.1rem;" title="Eliminar">×</button>
+                <button onclick="confirmarEliminar(${t.id})" style="background:none; border:none; color:#f87171; cursor:pointer; font-size:1.1rem;" title="Eliminar">×</button>
             </div>
         `;
         listaTransaccionesEl.appendChild(li);
@@ -172,22 +199,62 @@ function actualizarInterfaz() {
     renderizarGrafica();
 }
 
-function verificarAlarmaPorHora(hoy) {
-    const horaObjetivo = horaAvisoInput.value; // Formato "HH:MM"
-    if (!horaObjetivo) return;
-
-    const [hObj, mObj] = horaObjetivo.split(':').map(Number);
+function verificarAlarmasIndividuales() {
     const ahora = new Date();
-    
-    // Si la hora actual coincide con la hora configurada (con margen de 1 minuto)
-    if (ahora.getHours() === hObj && ahora.getMinutes() === mObj) {
-        // Verificar si hay deudas próximas o vencidas para mostrar banner extra
-        const deudasActivas = transacciones.filter(t => t.categoria === 'Deuda' && t.fechaVencimiento);
-        if (deudasActivas.length > 0) {
-            crearAlerta(`🔔 <strong>Alarma programada (${horaObjetivo}):</strong> Tienes compromisos y deudas registradas activas pendientes por revisar.`, 'warning');
+    const horaActualStr = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+    const hoyStr = ahora.toISOString().split('T')[0];
+
+    transacciones.forEach(t => {
+        if (t.categoria === 'Deuda' && t.fechaVencimiento && t.horaAlerta === horaActualStr) {
+            if (t.fechaVencimiento <= hoyStr) {
+                if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification("⏰ Alerta de Deuda Pendiente", { body: `La deuda "${t.descripcion}" por $${t.monto.toFixed(2)} requiere atención.` });
+                }
+            }
         }
-    }
+    });
 }
+
+setInterval(verificarAlarmasIndividuales, 30000);
+
+function mostrarModal(titulo, mensaje, icono = "⚠️", callback = null, mostrarCancelar = true) {
+    modalTitle.textContent = titulo;
+    modalMessage.textContent = mensaje;
+    modalIcon.textContent = icono;
+    accionConfirmadaCallback = callback;
+
+    if (mostrarCancelar) {
+        modalBtnCancel.classList.remove('hidden');
+    } else {
+        modalBtnCancel.classList.add('hidden');
+    }
+
+    modalOverlay.classList.remove('hidden');
+}
+
+modalBtnCancel.addEventListener('click', () => {
+    modalOverlay.classList.add('hidden');
+    accionConfirmadaCallback = null;
+});
+
+modalBtnConfirm.addEventListener('click', () => {
+    modalOverlay.classList.add('hidden');
+    if (accionConfirmadaCallback) accionConfirmadaCallback();
+});
+
+window.confirmarEliminar = function(id) {
+    mostrarModal("Eliminar Registro", "¿Deseas eliminar este movimiento?", "🗑️", () => {
+        transacciones = transacciones.filter(t => t.id !== id);
+        guardarYActualizar();
+    });
+};
+
+btnLimpiar.addEventListener('click', () => {
+    mostrarModal("Borrar Todo", "¿Estás seguro de que deseas eliminar todo el historial?", "⚠️", () => {
+        transacciones = [];
+        guardarYActualizar();
+    });
+});
 
 btnFiltrar.addEventListener('click', () => renderizarGrafica());
 btnResetFiltro.addEventListener('click', () => {
@@ -229,10 +296,7 @@ function renderizarGrafica() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    if (chartInstance) {
-        chartInstance.destroy();
-    }
-
+    if (chartInstance) chartInstance.destroy();
     if (typeof Chart === 'undefined') return;
 
     chartInstance = new Chart(ctx, {
@@ -270,17 +334,5 @@ function formatFecha(str) {
     const [y, m, d] = str.split('-');
     return `${d}/${m}/${y}`;
 }
-
-window.eliminarTransaccion = function(id) {
-    transacciones = transacciones.filter(t => t.id !== id);
-    guardarYActualizar();
-};
-
-btnLimpiar.addEventListener('click', () => {
-    if (confirm('¿Deseas eliminar todas las transacciones?')) {
-        transacciones = [];
-        guardarYActualizar();
-    }
-});
 
 actualizarInterfaz();
