@@ -1,126 +1,177 @@
+:root {
+    --bg-main: #07090e;
+    --bg-card: #111827;
+    --border-color: #1f2937;
+    --accent: #3b82f6;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
-    background-color: #0b1120;
-    color: #f8fafc;
+    background-color: var(--bg-main);
+    color: var(--text-main);
     min-height: 100vh;
-    padding: 16px;
+    padding: 14px;
     display: flex;
     justify-content: center;
 }
 
 .app-container {
-    max-width: 900px;
+    max-width: 950px;
     width: 100%;
 }
 
 .app-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.app-header h1 {
-    font-size: 1.8rem;
-    color: #38bdf8;
-    margin-bottom: 4px;
-}
-
-.app-header p {
-    color: #94a3b8;
-    font-size: 0.88rem;
-}
-
-/* Tarjetas */
-.card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
+    background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
     padding: 16px;
     margin-bottom: 16px;
 }
 
-.card-title {
-    font-size: 1rem;
-    color: #f8fafc;
-    margin-bottom: 12px;
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-/* Métricas en Grid */
+.app-header h1 {
+    font-size: 1.6rem;
+    color: #60a5fa;
+    font-weight: 800;
+}
+
+.app-header p {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+.alarm-config {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.alarm-config label {
+    font-size: 0.75rem;
+    color: var(--warning);
+    display: block;
+    margin-bottom: 2px;
+}
+
+.alarm-config input[type="time"] {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 0.85rem;
+    padding: 2px;
+}
+
+/* Tarjetas */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.card-title {
+    font-size: 1rem;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+/* Métricas (4 columnas) */
 .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 16px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .metrics-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 .metric-card {
-    background: #1e293b;
-    border: 1px solid #334155;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 14px;
     text-align: center;
 }
 
 .metric-label {
-    font-size: 0.75rem;
-    color: #94a3b8;
+    font-size: 0.7rem;
+    color: var(--text-muted);
     text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 .metric-value {
-    font-size: 1.4rem;
-    font-weight: bold;
+    font-size: 1.3rem;
+    font-weight: 800;
     margin-top: 4px;
 }
 
-.metric-card.ingreso .metric-value { color: #4ade80; }
-.metric-card.gasto .metric-value { color: #f87171; }
-.metric-card.balance .metric-value { color: #38bdf8; }
+.metric-card.ingreso .metric-value { color: var(--success); }
+.metric-card.gasto .metric-value { color: var(--danger); }
+.metric-card.deuda-card .metric-value { color: var(--warning); }
+.metric-card.balance .metric-value { color: #60a5fa; }
 
 /* Gráfica */
 .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
     margin-bottom: 12px;
 }
 
 .chart-header h3 {
-    font-size: 0.95rem;
-    color: #94a3b8;
-    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
 }
 
 .date-filter {
     display: flex;
     gap: 6px;
     align-items: center;
-    flex-wrap: wrap;
 }
 
 .date-filter input[type="date"] {
-    flex: 1;
-    min-width: 110px;
-    padding: 6px 8px;
-    font-size: 0.8rem;
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    width: 110px;
 }
 
 .chart-wrapper {
     position: relative;
     width: 100%;
-    height: 240px;
+    height: 220px;
 }
 
-/* Formularios */
+/* Grid del Formulario */
 .main-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -140,12 +191,13 @@ body {
 label {
     display: block;
     margin-bottom: 4px;
-    font-size: 0.8rem;
-    color: #cbd5e1;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 600;
 }
 
 .text-alert {
-    color: #f59e0b;
+    color: var(--warning);
     font-weight: bold;
 }
 
@@ -153,56 +205,56 @@ input, select {
     width: 100%;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #475569;
-    background-color: #0f172a;
+    border: 1px solid var(--border-color);
+    background-color: #030712;
     color: #fff;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
 }
 
 input:focus, select:focus {
     outline: none;
-    border-color: #38bdf8;
+    border-color: var(--accent);
 }
 
 /* Botones */
 .btn-primary {
     width: 100%;
     padding: 12px;
-    background-color: #0284c7;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     color: white;
     border: none;
     border-radius: 8px;
     font-weight: bold;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     cursor: pointer;
 }
 
 .btn-secondary {
-    padding: 6px 12px;
-    background: #334155;
+    padding: 5px 10px;
+    background: #374151;
     color: #fff;
     border: none;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     cursor: pointer;
 }
 
 .btn-ghost {
-    padding: 6px 10px;
+    padding: 5px 8px;
     background: transparent;
-    border: 1px solid #475569;
-    color: #94a3b8;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
     border-radius: 6px;
     cursor: pointer;
 }
 
 .btn-danger {
     padding: 4px 8px;
-    background: #7f1d1d;
+    background: rgba(239, 68, 68, 0.2);
     color: #fca5a5;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.75rem;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 6px;
+    font-size: 0.72rem;
     cursor: pointer;
 }
 
@@ -216,30 +268,41 @@ input:focus, select:focus {
 
 ul {
     list-style: none;
-    max-height: 300px;
+    max-height: 320px;
     overflow-y: auto;
 }
 
 li {
-    background-color: #0f172a;
+    background-color: #030712;
     padding: 10px 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-left: 4px solid #334155;
+    border-left: 4px solid var(--border-color);
 }
 
-li.ingreso { border-left-color: #4ade80; }
-li.gasto { border-left-color: #f87171; }
-li.deuda { border-left-color: #f59e0b; }
+li.ingreso { border-left-color: var(--success); }
+li.gasto { border-left-color: var(--danger); }
+li.deuda { border-left-color: var(--warning); }
+
+.badge-info {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    font-size: 0.68rem;
+    padding: 2px 5px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 3px;
+    margin-right: 4px;
+}
 
 .badge-deuda {
-    background-color: #78350f;
-    color: #fef3c7;
-    font-size: 0.7rem;
-    padding: 2px 6px;
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    font-size: 0.68rem;
+    padding: 2px 5px;
     border-radius: 4px;
     display: inline-block;
     margin-top: 3px;
@@ -247,17 +310,17 @@ li.deuda { border-left-color: #f59e0b; }
 
 .alert-box {
     background: rgba(245, 158, 11, 0.15);
-    border: 1px solid #f59e0b;
+    border: 1px solid var(--warning);
     color: #fef3c7;
-    padding: 10px 14px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 10px;
     margin-bottom: 12px;
     font-size: 0.85rem;
 }
 
 .alert-box.danger {
     background: rgba(239, 68, 68, 0.15);
-    border-color: #ef4444;
+    border-color: var(--danger);
     color: #fecaca;
 }
 
